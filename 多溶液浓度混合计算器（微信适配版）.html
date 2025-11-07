@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>溶液浓度混合计算器</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            line-height: 1.5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        .share-info {
+            background: #e3f2fd;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #1565c0;
+            text-align: center;
+        }
+        .tab-container {
+            margin-bottom: 20px;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #ecf0f1;
+            margin-bottom: 15px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .tabs::-webkit-scrollbar {
+            display: none;
+        }
+        .tab {
+            flex: 1;
+            min-width: 100px;
+            padding: 12px 8px;
+            background-color: #f8f9fa;
+            border: none;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            margin-right: 3px;
+            font-weight: 500;
+            transition: all 0.3s;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        .tab.active {
+            background-color: #3498db;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #34495e;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        input[type="number"], select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #bdc3c7;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            -webkit-appearance: none;
+        }
+        input[type="number"]:focus, select:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        button:hover, button:active {
+            background-color: #2980b9;
+        }
+        #result {
+            margin-top: 20px;
+        }
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            font-size: 14px;
+        }
+        .result-table th {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 8px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .result-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        .result-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .result-table tr:hover {
+            background-color: #e8f4fc;
+        }
+        .error {
+            background-color: #ffeaa7;
+            color: #d63031;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid #d63031;
+            font-size: 14px;
+        }
+        .success {
+            background-color: #55efc4;
+            color: #2d3436;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid #00b894;
+            font-size: 14px;
+        }
+        .info {
+            background-color: #dfe6e9;
+            color: #2d3436;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid #636e72;
+            font-size: 14px;
+        }
+        .calculation-steps {
+            margin-top: 15px;
+            padding: 12px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+            font-size: 13px;
+        }
+        .fixed-volume {
+            background-color: #fff3cd;
+        }
+        .input-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .input-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+            min-width: 120px;
+        }
+        .fixed-solution-group {
+            background-color: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+        
+        /* 移动端优化 */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 18px;
+                margin-bottom: 15px;
+            }
+            .tab {
+                padding: 10px 6px;
+                font-size: 12px;
+                min-width: 80px;
+            }
+            .input-row {
+                gap: 8px;
+            }
+            .input-row .form-group {
+                min-width: calc(50% - 8px);
+            }
+            input[type="number"], select {
+                padding: 10px;
+                font-size: 16px; /* 防止iOS缩放 */
+            }
+            button {
+                padding: 12px;
+            }
+            .result-table {
+                font-size: 12px;
+            }
+            .result-table th, .result-table td {
+                padding: 8px 6px;
+            }
+        }
+        
+        /* 防止iOS输入框样式问题 */
+        input[type="number"] {
+            -webkit-appearance: none;
+            -moz-appearance: textfield;
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>溶液浓度混合计算器</h1>
+        <div class="share-info">
+            分享给朋友，随时随地计算溶液混合比例
+        </div>
+        
+        <div class="tab-container">
+            <div class="tabs">
+                <button class="tab active" data-tab="two-solution">二溶液</button>
+                <button class="tab" data-tab="three-solution">三溶液</button>
+                <button class="tab" data-tab="four-solution">四溶液</button>
+            </div>
+            
+            <!-- 二溶液计算界面 -->
+            <div id="two-solution" class="tab-content active">
+                <form id="twoSolutionForm">
+                    <div class="input-row">
+                        <div class="form-group">
+                            <label for="a2">溶液1浓度</label>
+                            <input type="number" id="a2" step="any" required placeholder="如: 0.1">
+                        </div>
+                        <div class="form-group">
+                            <label for="b2">溶液2浓度</label>
+                            <input type="number" id="b2" step="any" required placeholder="如: 0.2">
+                        </div>
+                    </div>
+                    
+                    <div class="input-row">
+                        <div class="form-group">
+                            <label for="c2">目标浓度</label>
+                            <input type="number" id="c2" step="any" required placeholder="如: 0.15">
+                        </div>
+                        <div class="form-group">
+                            <label for="x2">总体积(ml)</label>
+                            <input type="number" id="x2" step="any" required placeholder="如: 100">
+                        </div>
+                    </div>
+                    
+                    <button type="submit">计算所需体积</button>
+                </form>
+            </div>
+            
+            <!-- 三溶液计算界面 -->
+            <div id="three-solution" class="tab-content">
+                <form id="threeSolutionForm">
+                    <div class="input-row">
+                        <div class="form-group">
+                            <label for="a3">溶液1浓度</label>
+                            <input type="number" id="a3" step="any" required placeholder="如: 0.1">
+                        </div>
+                        <div class="form-group">
+                            <label for="b3">溶液2浓度</label>
+                            <input type="number" id="b3" step="any" required placeholder="如: 0.2">
+                        </div>
+                        <div class="form-group">
+                            <label for="c3">溶液3浓度</label>
+                            <input type="number" id="c3" step="any" required placeholder="如: 0.3">
+                        </div>
+                    </div>
+                    
+                    <div class="input-row">
+                        <div class="form-group">
+                            <label for="d3">目标浓度</label>
+                            <input type="number" id="d3" step="any" required placeholder="如: 0.18">
+                        </div>
+                        <div class="form-group">
+                            <label for="x3">总体积(ml)</label>
+                            <input type="number" id="x3" step="any" required placeholder="如: 100">
+                        </div>
+                    </div>
+                    
+                    <div class="fixed-solution-group">
+                        <div class="form-group">
+                            <label for="fixedSolution3">固定用量的溶液</label>
+                            <select id="fixedSolution3" required>
+                                <option value="">请选择</option>
+                                <option value="1">溶液1</option>
+                                <option value="2">溶液2</option>
+                                <option value="3">溶液3</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="fixedVolume3">固定用量(ml)</label>
+                            <input type="number" id="fixedVolume3" step="any" required placeholder="如: 20">
+                        </div>
+                    </div>
+                    
+                    <button type="submit">计算所需体积</button>
+                </form>
+            </div>
+            
+            <!-- 四溶液计算界面 -->
+            <div id="four-solution" class="tab-content">
+                <form id="fourSolutionForm">
+                    <div class="input-row">
+                        <div class="form-group">
+                            <label for="a4">溶液1浓度</label>
+                            <input type="number" id="a4" step="any" required placeholder="如: 0.1">
+                        </div>
+                        <div class="form-group">
+                            <label for="b4">溶液2浓度</label>
+                            <input type="number" id="b4" step="any" required placeholder="如: 0.2">
+                        </div>
+                        <div class="form-group">
+                            <label for="c4">溶液3浓度</label>
+                            <input type="number" id="c4" step="any" required placeholder="如: 0.3">
+                        </div>
+                        <div class="form-group">
+                            <label for="d4">溶液4浓度</label>
+                            <input type="number" id="d4" step="any" required placeholder="如: 0.4">
+                        </div>
+                    </div>
+                    
+                    <div class="input-row">
+                        <div class="form-group">
+                            <label for="e4">目标浓度</label>
+                            <input type="number" id="e4" step="any" required placeholder="如: 0.25">
+                        </div>
+                        <div class="form-group">
+                            <label for="x4">总体积(ml)</label>
+                            <input type="number" id="x4" step="any" required placeholder="如: 100">
+                        </div>
+                    </div>
+                    
+                    <div class="fixed-solution-group">
+                        <div class="input-row">
+                            <div class="form-group">
+                                <label for="fixedSolution14">第一个固定溶液</label>
+                                <select id="fixedSolution14" required>
+                                    <option value="">请选择</option>
+                                    <option value="1">溶液1</option>
+                                    <option value="2">溶液2</option>
+                                    <option value="3">溶液3</option>
+                                    <option value="4">溶液4</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="fixedVolume14">固定用量(ml)</label>
+                                <input type="number" id="fixedVolume14" step="any" required placeholder="如: 20">
+                            </div>
+                        </div>
+                        
+                        <div class="input-row">
+                            <div class="form-group">
+                                <label for="fixedSolution24">第二个固定溶液</label>
+                                <select id="fixedSolution24" required>
+                                    <option value="">请选择</option>
+                                    <option value="1">溶液1</option>
+                                    <option value="2">溶液2</option>
+                                    <option value="3">溶液3</option>
+                                    <option value="4">溶液4</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="fixedVolume24">固定用量(ml)</label>
+                                <input type="number" id="fixedVolume24" step="any" required placeholder="如: 15">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit">计算所需体积</button>
+                </form>
+            </div>
+        </div>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // 移动端触摸优化
+        document.addEventListener('touchstart', function() {}, {passive: true});
+        
+        // 防止双击缩放
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+        
+        // 选项卡切换功能
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                this.classList.add('active');
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+                
+                // 清除结果
+                document.getElementById('result').innerHTML = '';
+            });
+        });
+        
+        // 二溶液计算
+        document.getElementById('twoSolutionForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const a = parseFloat(document.getElementById('a2').value);
+            const b = parseFloat(document.getElementById('b2').value);
+            const c = parseFloat(document.getElementById('c2').value);
+            const x = parseFloat(document.getElementById('x2').value);
+
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '';
+
+            if (isNaN(a) || isNaN(b) || isNaN(c) || isNaN(x)) {
+                resultDiv.innerHTML = '<div class="error">请输入有效的数字。</div>';
+                return;
+            }
+
+            if (a === b) {
+                if (c === a) {
+                    resultDiv.innerHTML = '<div class="info">溶液1和溶液2浓度相同，目标浓度也相同，可以任意比例混合。例如，各取 ' + (x / 2).toFixed(2) + ' ml。</div>';
+                } else {
+                    resultDiv.innerHTML = '<div class="error">溶液1和溶液2浓度相同，但目标浓度不同，无法配出目标浓度。</div>';
+                }
+                return;
+            }
+
+            const v1 = (c - b) * x / (a - b);
+            const v2 = x - v1;
+
+            if (v1 < 0 || v2 < 0 || v1 > x || v2 > x) {
+                resultDiv.innerHTML = '<div class="error">无解：计算出的体积无效。请确保浓度值合理（例如，c 应在 a 和 b 之间）。</div>';
+            } else {
+                let tableHTML = `
+                    <div class="success">
+                        <h3>二溶液混合方案</h3>
+                        <table class="result-table">
+                            <tr>
+                                <th>溶液类型</th>
+                                <th>浓度</th>
+                                <th>体积(ml)</th>
+                                <th>占比</th>
+                            </tr>
+                            <tr>
+                                <td>溶液1</td>
+                                <td>${(a * 100).toFixed(2)}%</td>
+                                <td>${v1.toFixed(2)}</td>
+                                <td>${((v1 / x) * 100).toFixed(2)}%</td>
+                            </tr>
+                            <tr>
+                                <td>溶液2</td>
+                                <td>${(b * 100).toFixed(2)}%</td>
+                                <td>${v2.toFixed(2)}</td>
+                                <td>${((v2 / x) * 100).toFixed(2)}%</td>
+                            </tr>
+                            <tr style="background-color: #e8f4fc; font-weight: bold;">
+                                <td>目标溶液</td>
+                                <td>${(c * 100).toFixed(2)}%</td>
+                                <td>${x.toFixed(2)}</td>
+                                <td>100%</td>
+                            </tr>
+                        </table>
+                    </div>
+                `;
+                resultDiv.innerHTML = tableHTML;
+                
+                // 滚动到结果区域
+                resultDiv.scrollIntoView({behavior: 'smooth', block: 'start'});
+            }
+        });
+        
+        // 三溶液计算
+        document.getElementById('threeSolutionForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const a = parseFloat(document.getElementById('a3').value);
+            const b = parseFloat(document.getElementById('b3').value);
+            const c_val = parseFloat(document.getElementById('c3').value);
+            const d = parseFloat(document.getElementById('d3').value);
+            const x = parseFloat(document.getElementById('x3').value);
+            const fixedSolution = document.getElementById('fixedSolution3').value;
+            const fixedVolume = parseFloat(document.getElementById('fixedVolume3').value);
+
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '';
+
+            if (isNaN(a) || isNaN(b) || isNaN(c_val) || isNaN(d) || isNaN(x) || isNaN(fixedVolume) || !fixedSolution) {
+                resultDiv.innerHTML = '<div class="error">请填写所有字段。</div>';
+                return;
+            }
+
+            if (fixedVolume <= 0 || fixedVolume >= x) {
+                resultDiv.innerHTML = '<div class="error">固定用量必须大于0且小于总体积。</div>';
+                return;
+            }
+
+            let v1, v2, v3;
+            let remainingVolume = x - fixedVolume;
+            
+            switch(fixedSolution) {
+                case '1':
+                    v1 = fixedVolume;
+                    if (b === c_val) {
+                        if (Math.abs(b - (d*x - a*v1)/remainingVolume) < 1e-10) {
+                            v2 = remainingVolume / 2;
+                            v3 = remainingVolume / 2;
+                        } else {
+                            resultDiv.innerHTML = '<div class="error">无解：无法配出目标浓度。</div>';
+                            return;
+                        }
+                    } else {
+                        v2 = (d*x - a*v1 - c_val*remainingVolume) / (b - c_val);
+                        v3 = remainingVolume - v2;
+                    }
+                    break;
+                    
+                case '2':
+                    v2 = fixedVolume;
+                    if (a === c_val) {
+                        if (Math.abs(a - (d*x - b*v2)/remainingVolume) < 1e-10) {
+                            v1 = remainingVolume / 2;
+                            v3 = remainingVolume / 2;
+                        } else {
+                            resultDiv.innerHTML = '<div class="error">无解：无法配出目标浓度。</div>';
+                            return;
+                        }
+                    } else {
+                        v1 = (d*x - b*v2 - c_val*remainingVolume) / (a - c_val);
+                        v3 = remainingVolume - v1;
+                    }
+                    break;
+                    
+                case '3':
+                    v3 = fixedVolume;
+                    if (a === b) {
+                        if (Math.abs(a - (d*x - c_val*v3)/remainingVolume) < 1e-10) {
+                            v1 = remainingVolume / 2;
+                            v2 = remainingVolume / 2;
+                        } else {
+                            resultDiv.innerHTML = '<div class="error">无解：无法配出目标浓度。</div>';
+                            return;
+                        }
+                    } else {
+                        v1 = (d*x - c_val*v3 - b*remainingVolume) / (a - b);
+                        v2 = remainingVolume - v1;
+                    }
+                    break;
+            }
+
+            if (isNaN(v1) || isNaN(v2) || isNaN(v3) || 
+                v1 < -1e-10 || v2 < -1e-10 || v3 < -1e-10 ||
+                Math.abs(v1 + v2 + v3 - x) > 1e-10) {
+                resultDiv.innerHTML = '<div class="error">无解：无法配出目标浓度。请检查浓度值和固定用量是否合理。</div>';
+                return;
+            }
+
+            v1 = Math.max(0, v1);
+            v2 = Math.max(0, v2);
+            v3 = Math.max(0, v3);
+            
+            const total = v1 + v2 + v3;
+            if (Math.abs(total - x) > 1e-10) {
+                const scale = x / total;
+                v1 *= scale;
+                v2 *= scale;
+                v3 *= scale;
+            }
+
+            let tableHTML = `
+                <div class="success">
+                    <h3>三溶液混合方案</h3>
+                    <table class="result-table">
+                        <tr>
+                            <th>溶液类型</th>
+                            <th>浓度</th>
+                            <th>体积(ml)</th>
+                            <th>占比</th>
+                        </tr>
+                        <tr ${fixedSolution === '1' ? 'class="fixed-volume"' : ''}>
+                            <td>溶液1${fixedSolution === '1' ? ' (固定)' : ''}</td>
+                            <td>${(a * 100).toFixed(2)}%</td>
+                            <td>${v1.toFixed(2)}</td>
+                            <td>${((v1 / x) * 100).toFixed(2)}%</td>
+                        </tr>
+                        <tr ${fixedSolution === '2' ? 'class="fixed-volume"' : ''}>
+                            <td>溶液2${fixedSolution === '2' ? ' (固定)' : ''}</td>
+                            <td>${(b * 100).toFixed(2)}%</td>
+                            <td>${v2.toFixed(2)}</td>
+                            <td>${((v2 / x) * 100).toFixed(2)}%</td>
+                        </tr>
+                        <tr ${fixedSolution === '3' ? 'class="fixed-volume"' : ''}>
+                            <td>溶液3${fixedSolution === '3' ? ' (固定)' : ''}</td>
+                            <td>${(c_val * 100).toFixed(2)}%</td>
+                            <td>${v3.toFixed(2)}</td>
+                            <td>${((v3 / x) * 100).toFixed(2)}%</td>
+                        </tr>
+                        <tr style="background-color: #e8f4fc; font-weight: bold;">
+                            <td>目标溶液</td>
+                            <td>${(d * 100).toFixed(2)}%</td>
+                            <td>${x.toFixed(2)}</td>
+                            <td>100%</td>
+                        </tr>
+                    </table>
+                </div>
+            `;
+            resultDiv.innerHTML = tableHTML;
+            resultDiv.scrollIntoView({behavior: 'smooth', block: 'start'});
+        });
+        
+        // 四溶液计算
+        document.getElementById('fourSolutionForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const a = parseFloat(document.getElementById('a4').value);
+            const b = parseFloat(document.getElementById('b4').value);
+            const c_val = parseFloat(document.getElementById('c4').value);
+            const d_val = parseFloat(document.getElementById('d4').value);
+            const e = parseFloat(document.getElementById('e4').value);
+            const x = parseFloat(document.getElementById('x4').value);
+            const fixedSolution1 = document.getElementById('fixedSolution14').value;
+            const fixedVolume1 = parseFloat(document.getElementById('fixedVolume14').value);
+            const fixedSolution2 = document.getElementById('fixedSolution24').value;
+            const fixedVolume2 = parseFloat(document.getElementById('fixedVolume24').value);
+
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '';
+
+            if (isNaN(a) || isNaN(b) || isNaN(c_val) || isNaN(d_val) || isNaN(e) || isNaN(x) || 
+                isNaN(fixedVolume1) || isNaN(fixedVolume2) || !fixedSolution1 || !fixedSolution2) {
+                resultDiv.innerHTML = '<div class="error">请填写所有字段。</div>';
+                return;
+            }
+
+            if (fixedSolution1 === fixedSolution2) {
+                resultDiv.innerHTML = '<div class="error">请选择两种不同的溶液进行固定。</div>';
+                return;
+            }
+
+            if (fixedVolume1 <= 0 || fixedVolume2 <= 0 || (fixedVolume1 + fixedVolume2) >= x) {
+                resultDiv.innerHTML = '<div class="error">固定用量必须大于0且两者之和小于总体积。</div>';
+                return;
+            }
+
+            let v1 = 0, v2 = 0, v3 = 0, v4 = 0;
+            
+            if (fixedSolution1 === '1') v1 = fixedVolume1;
+            if (fixedSolution1 === '2') v2 = fixedVolume1;
+            if (fixedSolution1 === '3') v3 = fixedVolume1;
+            if (fixedSolution1 === '4') v4 = fixedVolume1;
+            
+            if (fixedSolution2 === '1') v1 = fixedVolume2;
+            if (fixedSolution2 === '2') v2 = fixedVolume2;
+            if (fixedSolution2 === '3') v3 = fixedVolume2;
+            if (fixedSolution2 === '4') v4 = fixedVolume2;
+
+            const remainingVolume = x - v1 - v2 - v3 - v4;
+            
+            const solutions = ['1', '2', '3', '4'];
+            const fixedSolutions = [fixedSolution1, fixedSolution2];
+            const calcSolutions = solutions.filter(s => !fixedSolutions.includes(s));
+            
+            if (calcSolutions.length !== 2) {
+                resultDiv.innerHTML = '<div class="error">计算错误：需要计算两种溶液的体积。</div>';
+                return;
+            }
+            
+            const sol1 = calcSolutions[0];
+            const sol2 = calcSolutions[1];
+            
+            const getConcentration = (sol) => {
+                switch(sol) {
+                    case '1': return a;
+                    case '2': return b;
+                    case '3': return c_val;
+                    case '4': return d_val;
+                    default: return 0;
+                }
+            };
+            
+            const conc1 = getConcentration(sol1);
+            const conc2 = getConcentration(sol2);
+            
+            const fixedMass = a*v1 + b*v2 + c_val*v3 + d_val*v4;
+            const targetMass = e*x;
+            const remainingMass = targetMass - fixedMass;
+            
+            if (conc1 === conc2) {
+                if (Math.abs(conc1 - remainingMass/remainingVolume) < 1e-10) {
+                    if (sol1 === '1') v1 = remainingVolume / 2;
+                    if (sol1 === '2') v2 = remainingVolume / 2;
+                    if (sol1 === '3') v3 = remainingVolume / 2;
+                    if (sol1 === '4') v4 = remainingVolume / 2;
+                    
+                    if (sol2 === '1') v1 = remainingVolume / 2;
+                    if (sol2 === '2') v2 = remainingVolume / 2;
+                    if (sol2 === '3') v3 = remainingVolume / 2;
+                    if (sol2 === '4') v4 = remainingVolume / 2;
+                } else {
+                    resultDiv.innerHTML = '<div class="error">无解：无法配出目标浓度。</div>';
+                    return;
+                }
+            } else {
+                const v_sol1 = (remainingMass - conc2 * remainingVolume) / (conc1 - conc2);
+                const v_sol2 = remainingVolume - v_sol1;
+                
+                if (sol1 === '1') v1 = v_sol1;
+                if (sol1 === '2') v2 = v_sol1;
+                if (sol1 === '3') v3 = v_sol1;
+                if (sol1 === '4') v4 = v_sol1;
+                
+                if (sol2 === '1') v1 = v_sol2;
+                if (sol2 === '2') v2 = v_sol2;
+                if (sol2 === '3') v3 = v_sol2;
+                if (sol2 === '4') v4 = v_sol2;
+            }
+
+            if (isNaN(v1) || isNaN(v2) || isNaN(v3) || isNaN(v4) || 
+                v1 < -1e-10 || v2 < -1e-10 || v3 < -1e-10 || v4 < -1e-10 ||
+                Math.abs(v1 + v2 + v3 + v4 - x) > 1e-10) {
+                resultDiv.innerHTML = '<div class="error">无解：无法配出目标浓度。请检查浓度值和固定用量是否合理。</div>';
+                return;
+            }
+
+            v1 = Math.max(0, v1);
+            v2 = Math.max(0, v2);
+            v3 = Math.max(0, v3);
+            v4 = Math.max(0, v4);
+            
+            const total = v1 + v2 + v3 + v4;
+            if (Math.abs(total - x) > 1e-10) {
+                const scale = x / total;
+                v1 *= scale;
+                v2 *= scale;
+                v3 *= scale;
+                v4 *= scale;
+            }
+
+            let tableHTML = `
+                <div class="success">
+                    <h3>四溶液混合方案</h3>
+                    <table class="result-table">
+                        <tr>
+                            <th>溶液类型</th>
+                            <th>浓度</th>
+                            <th>体积(ml)</th>
+                            <th>占比</th>
+                        </tr>
+                        <tr ${fixedSolution1 === '1' || fixedSolution2 === '1' ? 'class="fixed-volume"' : ''}>
+                            <td>溶液1${fixedSolution1 === '1' || fixedSolution2 === '1' ? ' (固定)' : ''}</td>
+                            <td>${(a * 100).toFixed(2)}%</td>
+                            <td>${v1.toFixed(2)}</td>
+                            <td>${((v1 / x) * 100).toFixed(2)}%</td>
+                        </tr>
+                        <tr ${fixedSolution1 === '2' || fixedSolution2 === '2' ? 'class="fixed-volume"' : ''}>
+                            <td>溶液2${fixedSolution1 === '2' || fixedSolution2 === '2' ? ' (固定)' : ''}</td>
+                            <td>${(b * 100).toFixed(2)}%</td>
+                            <td>${v2.toFixed(2)}</td>
+                            <td>${((v2 / x) * 100).toFixed(2)}%</td>
+                        </tr>
+                        <tr ${fixedSolution1 === '3' || fixedSolution2 === '3' ? 'class="fixed-volume"' : ''}>
+                            <td>溶液3${fixedSolution1 === '3' || fixedSolution2 === '3' ? ' (固定)' : ''}</td>
+                            <td>${(c_val * 100).toFixed(2)}%</td>
+                            <td>${v3.toFixed(2)}</td>
+                            <td>${((v3 / x) * 100).toFixed(2)}%</td>
+                        </tr>
+                        <tr ${fixedSolution1 === '4' || fixedSolution2 === '4' ? 'class="fixed-volume"' : ''}>
+                            <td>溶液4${fixedSolution1 === '4' || fixedSolution2 === '4' ? ' (固定)' : ''}</td>
+                            <td>${(d_val * 100).toFixed(2)}%</td>
+                            <td>${v4.toFixed(2)}</td>
+                            <td>${((v4 / x) * 100).toFixed(2)}%</td>
+                        </tr>
+                        <tr style="background-color: #e8f4fc; font-weight: bold;">
+                            <td>目标溶液</td>
+                            <td>${(e * 100).toFixed(2)}%</td>
+                            <td>${x.toFixed(2)}</td>
+                            <td>100%</td>
+                        </tr>
+                    </table>
+                </div>
+            `;
+            resultDiv.innerHTML = tableHTML;
+            resultDiv.scrollIntoView({behavior: 'smooth', block: 'start'});
+        });
+        
+        // 初始化示例数据
+        window.addEventListener('load', function() {
+            // 为二溶液界面设置示例数据
+            document.getElementById('a2').value = '0.1';
+            document.getElementById('b2').value = '0.2';
+            document.getElementById('c2').value = '0.15';
+            document.getElementById('x2').value = '100';
+            
+            // 为三溶液界面设置示例数据
+            document.getElementById('a3').value = '0.1';
+            document.getElementById('b3').value = '0.2';
+            document.getElementById('c3').value = '0.3';
+            document.getElementById('d3').value = '0.18';
+            document.getElementById('x3').value = '100';
+            document.getElementById('fixedSolution3').value = '1';
+            document.getElementById('fixedVolume3').value = '20';
+            
+            // 为四溶液界面设置示例数据
+            document.getElementById('a4').value = '0.1';
+            document.getElementById('b4').value = '0.2';
+            document.getElementById('c4').value = '0.3';
+            document.getElementById('d4').value = '0.4';
+            document.getElementById('e4').value = '0.25';
+            document.getElementById('x4').value = '100';
+            document.getElementById('fixedSolution14').value = '1';
+            document.getElementById('fixedVolume14').value = '20';
+            document.getElementById('fixedSolution24').value = '2';
+            document.getElementById('fixedVolume24').value = '15';
+        });
+    </script>
+</body>
+</html>
