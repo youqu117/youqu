@@ -3,48 +3,346 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>你的网站主页</title>
+    <title>探索未知 | 深度工具集</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        :root {
+            --primary-dark: #0a0a0a;
+            --secondary-dark: #1a1a1a;
+            --accent-color: #00d4ff;
+            --accent-glow: rgba(0, 212, 255, 0.3);
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #001122 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* 背景效果 */
+        .bg-effects {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .grid-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(rgba(0, 212, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.3;
+        }
+        
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--accent-glow);
+            filter: blur(40px);
+            animation: float 15s infinite linear;
+        }
+        
+        .shape:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+        
+        .shape:nth-child(2) {
+            width: 200px;
+            height: 200px;
+            top: 60%;
+            left: 80%;
+            animation-delay: -5s;
+        }
+        
+        .shape:nth-child(3) {
+            width: 400px;
+            height: 400px;
+            top: 30%;
+            left: 60%;
+            animation-delay: -10s;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            33% {
+                transform: translate(30px, 50px) rotate(120deg);
+            }
+            66% {
+                transform: translate(-20px, 80px) rotate(240deg);
+            }
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header {
             text-align: center;
-            padding: 50px;
-            background-color: #f0f8ff;
+            margin-bottom: 80px;
         }
-        .nav-links {
-            margin: 30px 0;
+        
+        .main-title {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 300;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-color) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
         }
-        .nav-links a {
+        
+        .main-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: var(--accent-color);
+            border-radius: 2px;
+        }
+        
+        .tagline {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+        
+        .tool-card {
+            background: rgba(26, 26, 26, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 40px 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .tool-card:hover::before {
+            left: 100%;
+        }
+        
+        .tool-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-color);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+        }
+        
+        .tool-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+        
+        .tool-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+        }
+        
+        .tool-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        
+        .tool-link {
             display: inline-block;
-            margin: 10px 20px;
-            padding: 12px 24px;
-            background-color: #4CAF50;
-            color: white;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, var(--accent-color) 0%, #0099cc 100%);
+            color: var(--primary-dark);
             text-decoration: none;
-            border-radius: 5px;
-            font-size: 18px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
         }
-        .nav-links a:hover {
-            background-color: #45a049;
+        
+        .tool-link:hover {
+            background: transparent;
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            transform: scale(1.05);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 80px;
+            padding-top: 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tool-card {
+                padding: 30px 20px;
+            }
+            
+            .container {
+                padding: 20px 15px;
+            }
+        }
+        
+        /* 滚动动画 */
+        .tool-card {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        
+        .tool-card.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
     </style>
 </head>
 <body>
-    <h1>🎉 欢迎来到我的网站！</h1>
-    <p>这里是我创建的各种实用工具集合</p>
-    
-    <div class="nav-links">
-        <!-- 这里是重要的部分：添加链接到计算器页面 -->
-        <a href="%E5%A4%9A%E6%BA%B6%E6%B6%B2%E6%B5%93%E5%BA%A6%E6%B7%B7%E5%90%88%E8%AE%A1%E7%AE%97%E5%99%A8%EF%BC%88%E5%BE%AE%E4%BF%A1%E9%80%82%E9%85%8D%E7%89%88%EF%BC%89.html">
-            🔬 溶液配比计算器
-        <a href="love.html">
-            🔬 LOVE
-        </a>
-        
-        <!-- 如果您以后添加更多页面，可以继续在这里添加链接 -->
-        <!-- <a href="other-page.html">其他工具</a> -->
+    <div class="bg-effects">
+        <div class="grid-bg"></div>
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
     </div>
     
-    <p>选择上面的工具开始使用！</p>
+    <div class="container">
+        <header class="header">
+            <h1 class="main-title">探索未知边界</h1>
+            <p class="tagline">深度工具与创意解决方案的集合空间，为复杂问题提供简洁答案</p>
+        </header>
+        
+        <main class="tools-grid">
+            <div class="tool-card">
+                <span class="tool-icon">🔬</span>
+                <h3 class="tool-title">溶液配比计算器</h3>
+                <p class="tool-description">精确计算多种溶液混合配比，支持复杂浓度转换和单位换算，满足实验室级精度需求</p>
+                <a href="%E5%A4%9A%E6%BA%B6%E6%B6%B2%E6%B5%93%E5%BA%A6%E6%B7%B7%E5%90%88%E8%AE%A1%E7%AE%97%E5%99%A8%EF%BC%88%E5%BE%AE%E4%BF%A1%E9%80%82%E9%85%8D%E7%89%88%EF%BC%89.html" class="tool-link">开始计算</a>
+            </div>
+            
+            <div class="tool-card">
+                <span class="tool-icon">💖</span>
+                <h3 class="tool-title">心意表达空间</h3>
+                <p class="tool-description">精心设计的表白界面，融合美学与情感表达，创造难忘的数字化情感体验</p>
+                <a href="love.html" class="tool-link">传递心意</a>
+            </div>
+        </main>
+        
+        <footer class="footer">
+            <p>© 2024 深度工具集 | 探索 · 创造 · 超越</p>
+        </footer>
+    </div>
+
+    <script>
+        // 滚动动画效果
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+        
+        // 观察所有工具卡片
+        document.querySelectorAll('.tool-card').forEach(card => {
+            observer.observe(card);
+        });
+        
+        // 鼠标移动效果
+        document.addEventListener('mousemove', (e) => {
+            const shapes = document.querySelectorAll('.shape');
+            const mouseX = e.clientX / window.innerWidth;
+            const mouseY = e.clientY / window.innerHeight;
+            
+            shapes.forEach((shape, index) => {
+                const speed = (index + 1) * 0.0002;
+                const x = (mouseX - 0.5) * speed * 1000;
+                const y = (mouseY - 0.5) * speed * 1000;
+                
+                shape.style.transform = `translate(${x}px, ${y}px)`;
+            });
+        });
+        
+        // 页面加载动画
+        window.addEventListener('load', () => {
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.8s ease';
+            
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 100);
+        });
+    </script>
 </body>
 </html>
