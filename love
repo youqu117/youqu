@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>表白专用弹窗</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        
+        .container {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        h1 {
+            color: #fff;
+            font-size: 3rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+        }
+        
+        .love-message {
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 30px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .open-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .open-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+        }
+        
+        /* 弹窗样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s ease;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .confession-modal {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transform: scale(0.8);
+            transition: transform 0.5s ease;
+        }
+        
+        .modal-overlay.active .confession-modal {
+            transform: scale(1);
+        }
+        
+        .confession-title {
+            color: #ff6b6b;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        
+        .confession-text {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #555;
+            margin-bottom: 30px;
+        }
+        
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .accept-btn {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        .reject-btn {
+            background: #e0e0e0;
+            color: #555;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+        }
+        
+        .heart {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #ff6b6b;
+            transform: rotate(45deg);
+            animation: float 5s infinite ease-in-out;
+        }
+        
+        .heart:before, .heart:after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            position: absolute;
+        }
+        
+        .heart:before {
+            top: -10px;
+            left: 0;
+        }
+        
+        .heart:after {
+            top: 0;
+            left: -10px;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(45deg); }
+            50% { transform: translateY(-20px) rotate(45deg); }
+        }
+        
+        .success-message {
+            display: none;
+            font-size: 2rem;
+            color: #ff6b6b;
+            margin-top: 20px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .hearts-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="hearts-container" id="heartsContainer"></div>
+    
+    <div class="container">
+        <h1>💖 表白专用页面 💖</h1>
+        <p class="love-message">点击下方按钮打开表白弹窗</p>
+        <button class="open-btn" id="openModal">打开表白弹窗</button>
+        <div class="success-message" id="successMessage">💕 表白成功！我们在一起吧！ 💕</div>
+    </div>
+    
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="confession-modal">
+            <h2 class="confession-title">💌 我喜欢你 💌</h2>
+            <p class="confession-text">
+                遇见你是我最美丽的意外。<br>
+                你的笑容如阳光般温暖我的心房，<br>
+                你的存在让我的世界变得完整。<br>
+                我想和你一起，走过春夏秋冬，<br>
+                分享生活的点点滴滴。<br><br>
+                你愿意给我一个机会，让我成为你的那个人吗？
+            </p>
+            <div class="buttons">
+                <button class="btn accept-btn" id="acceptBtn">我愿意 💖</button>
+                <button class="btn reject-btn" id="rejectBtn">再考虑一下</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 创建漂浮的爱心
+        function createHearts() {
+            const heartsContainer = document.getElementById('heartsContainer');
+            const heartCount = 20;
+            
+            for (let i = 0; i < heartCount; i++) {
+                const heart = document.createElement('div');
+                heart.classList.add('heart');
+                
+                // 随机位置
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.top = Math.random() * 100 + 'vh';
+                
+                // 随机大小
+                const size = Math.random() * 20 + 10;
+                heart.style.width = size + 'px';
+                heart.style.height = size + 'px';
+                
+                // 随机动画延迟
+                heart.style.animationDelay = Math.random() * 5 + 's';
+                
+                heartsContainer.appendChild(heart);
+            }
+        }
+        
+        // 弹窗控制
+        document.getElementById('openModal').addEventListener('click', function() {
+            document.getElementById('modalOverlay').classList.add('active');
+        });
+        
+        document.getElementById('acceptBtn').addEventListener('click', function() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            document.getElementById('successMessage').style.display = 'block';
+            
+            // 创建更多爱心作为庆祝效果
+            createCelebrationHearts();
+        });
+        
+        document.getElementById('rejectBtn').addEventListener('click', function() {
+            // 让拒绝按钮移动位置
+            const rejectBtn = document.getElementById('rejectBtn');
+            const x = Math.random() * (window.innerWidth - 100);
+            const y = Math.random() * (window.innerHeight - 50);
+            
+            rejectBtn.style.position = 'fixed';
+            rejectBtn.style.left = x + 'px';
+            rejectBtn.style.top = y + 'px';
+        });
+        
+        // 点击弹窗外部关闭弹窗
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+        
+        // 创建庆祝爱心
+        function createCelebrationHearts() {
+            const container = document.querySelector('.container');
+            
+            for (let i = 0; i < 50; i++) {
+                const heart = document.createElement('div');
+                heart.innerHTML = '💖';
+                heart.style.position = 'absolute';
+                heart.style.fontSize = (Math.random() * 30 + 20) + 'px';
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.top = '100vh';
+                heart.style.animation = `fall ${Math.random() * 3 + 2}s linear forwards`;
+                
+                document.body.appendChild(heart);
+                
+                // 动画结束后移除元素
+                setTimeout(() => {
+                    heart.remove();
+                }, 5000);
+            }
+            
+            // 添加CSS动画
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fall {
+                    to {
+                        transform: translateY(-100vh) rotate(${Math.random() * 360}deg);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // 初始化
+        createHearts();
+    </script>
+</body>
+</html>
