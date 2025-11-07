@@ -2,26 +2,32 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>表白专用弹窗</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Microsoft YaHei', sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            line-height: 1.6;
+            color: #333;
             background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
+            padding: 15px;
         }
         
         .container {
+            width: 100%;
+            max-width: 500px;
             text-align: center;
             position: relative;
             z-index: 1;
@@ -29,33 +35,61 @@
         
         h1 {
             color: #fff;
-            font-size: 3rem;
+            font-size: 2.2rem;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
             margin-bottom: 20px;
+            font-weight: 600;
         }
         
         .love-message {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             color: #fff;
             margin-bottom: 30px;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            line-height: 1.8;
         }
         
         .open-btn {
             background: #ff6b6b;
             color: white;
             border: none;
-            padding: 15px 40px;
-            font-size: 1.2rem;
+            padding: 16px 40px;
+            font-size: 1.3rem;
             border-radius: 50px;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
             transition: all 0.3s ease;
+            font-weight: 600;
+            margin: 20px 0;
         }
         
-        .open-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+        .open-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.6);
+        }
+        
+        .features {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 30px 0;
+        }
+        
+        .feature {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px;
+            width: 140px;
+            text-align: center;
+            color: white;
+            font-weight: 500;
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
         }
         
         /* 弹窗样式 */
@@ -73,6 +107,7 @@
             opacity: 0;
             visibility: hidden;
             transition: all 0.5s ease;
+            padding: 15px;
         }
         
         .modal-overlay.active {
@@ -82,10 +117,10 @@
         
         .confession-modal {
             background: white;
-            width: 90%;
+            width: 100%;
             max-width: 500px;
             border-radius: 20px;
-            padding: 30px;
+            padding: 25px;
             text-align: center;
             position: relative;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
@@ -99,44 +134,52 @@
         
         .confession-title {
             color: #ff6b6b;
-            font-size: 2rem;
+            font-size: 1.8rem;
             margin-bottom: 20px;
+            font-weight: 600;
         }
         
         .confession-text {
-            font-size: 1.2rem;
-            line-height: 1.6;
+            font-size: 1.1rem;
+            line-height: 1.7;
             color: #555;
             margin-bottom: 30px;
+            text-align: left;
         }
         
         .buttons {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 15px;
+            flex-wrap: wrap;
         }
         
         .btn {
-            padding: 12px 30px;
+            padding: 14px 30px;
             border: none;
             border-radius: 50px;
             font-size: 1.1rem;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-weight: 600;
+            flex: 1;
+            min-width: 140px;
+        }
+        
+        .btn:active {
+            transform: scale(0.95);
         }
         
         .accept-btn {
             background: #ff6b6b;
             color: white;
+            box-shadow: 0 4px 10px rgba(255, 107, 107, 0.4);
         }
         
         .reject-btn {
             background: #e0e0e0;
             color: #555;
-        }
-        
-        .btn:hover {
-            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
         
         .heart {
@@ -174,15 +217,20 @@
         
         .success-message {
             display: none;
-            font-size: 2rem;
+            font-size: 1.8rem;
             color: #ff6b6b;
             margin-top: 20px;
             animation: pulse 1.5s infinite;
+            font-weight: 600;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
         }
         
         @keyframes pulse {
             0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+            50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
         
@@ -195,6 +243,74 @@
             pointer-events: none;
             z-index: 0;
         }
+        
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #999;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .close-btn:active {
+            background: #f0f0f0;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .love-message {
+                font-size: 1.1rem;
+            }
+            
+            .confession-title {
+                font-size: 1.5rem;
+            }
+            
+            .confession-text {
+                font-size: 1rem;
+            }
+            
+            .success-message {
+                font-size: 1.5rem;
+            }
+            
+            .btn {
+                padding: 12px 20px;
+                font-size: 1rem;
+            }
+            
+            .features {
+                gap: 10px;
+            }
+            
+            .feature {
+                width: 120px;
+                padding: 12px;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                min-width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -202,13 +318,33 @@
     
     <div class="container">
         <h1>💖 表白专用页面 💖</h1>
-        <p class="love-message">点击下方按钮打开表白弹窗</p>
+        <p class="love-message">用心制作的表白页面，点击下方按钮打开专属表白弹窗</p>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">💌</div>
+                <div>浪漫表白</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🎨</div>
+                <div>精美设计</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📱</div>
+                <div>手机优化</div>
+            </div>
+        </div>
+        
         <button class="open-btn" id="openModal">打开表白弹窗</button>
-        <div class="success-message" id="successMessage">💕 表白成功！我们在一起吧！ 💕</div>
+        
+        <div class="success-message" id="successMessage">
+            💕 表白成功！我们在一起吧！ 💕
+        </div>
     </div>
     
     <div class="modal-overlay" id="modalOverlay">
         <div class="confession-modal">
+            <button class="close-btn" id="closeModal">×</button>
             <h2 class="confession-title">💌 我喜欢你 💌</h2>
             <p class="confession-text">
                 遇见你是我最美丽的意外。<br>
@@ -229,7 +365,7 @@
         // 创建漂浮的爱心
         function createHearts() {
             const heartsContainer = document.getElementById('heartsContainer');
-            const heartCount = 20;
+            const heartCount = 15;
             
             for (let i = 0; i < heartCount; i++) {
                 const heart = document.createElement('div');
@@ -244,8 +380,14 @@
                 heart.style.width = size + 'px';
                 heart.style.height = size + 'px';
                 
-                // 随机动画延迟
+                // 随机颜色
+                const colors = ['#ff6b6b', '#ff8e8e', '#ffaaaa'];
+                heart.style.background = colors[Math.floor(Math.random() * colors.length)];
+                heart.style.opacity = Math.random() * 0.7 + 0.3;
+                
+                // 随机动画延迟和持续时间
                 heart.style.animationDelay = Math.random() * 5 + 's';
+                heart.style.animationDuration = (Math.random() * 10 + 10) + 's';
                 
                 heartsContainer.appendChild(heart);
             }
@@ -254,6 +396,10 @@
         // 弹窗控制
         document.getElementById('openModal').addEventListener('click', function() {
             document.getElementById('modalOverlay').classList.add('active');
+        });
+        
+        document.getElementById('closeModal').addEventListener('click', function() {
+            document.getElementById('modalOverlay').classList.remove('active');
         });
         
         document.getElementById('acceptBtn').addEventListener('click', function() {
@@ -267,10 +413,16 @@
         document.getElementById('rejectBtn').addEventListener('click', function() {
             // 让拒绝按钮移动位置
             const rejectBtn = document.getElementById('rejectBtn');
-            const x = Math.random() * (window.innerWidth - 100);
-            const y = Math.random() * (window.innerHeight - 50);
+            const modal = document.querySelector('.confession-modal');
+            const modalRect = modal.getBoundingClientRect();
             
-            rejectBtn.style.position = 'fixed';
+            const maxX = modalRect.width - rejectBtn.offsetWidth - 20;
+            const maxY = modalRect.height - rejectBtn.offsetHeight - 20;
+            
+            const x = Math.random() * maxX;
+            const y = Math.random() * maxY;
+            
+            rejectBtn.style.position = 'absolute';
             rejectBtn.style.left = x + 'px';
             rejectBtn.style.top = y + 'px';
         });
@@ -286,35 +438,70 @@
         function createCelebrationHearts() {
             const container = document.querySelector('.container');
             
-            for (let i = 0; i < 50; i++) {
+            for (let i = 0; i < 30; i++) {
                 const heart = document.createElement('div');
                 heart.innerHTML = '💖';
-                heart.style.position = 'absolute';
+                heart.style.position = 'fixed';
                 heart.style.fontSize = (Math.random() * 30 + 20) + 'px';
                 heart.style.left = Math.random() * 100 + 'vw';
                 heart.style.top = '100vh';
+                heart.style.zIndex = '1000';
                 heart.style.animation = `fall ${Math.random() * 3 + 2}s linear forwards`;
+                heart.style.pointerEvents = 'none';
                 
                 document.body.appendChild(heart);
                 
                 // 动画结束后移除元素
                 setTimeout(() => {
-                    heart.remove();
+                    if (heart.parentNode) {
+                        heart.parentNode.removeChild(heart);
+                    }
                 }, 5000);
             }
             
             // 添加CSS动画
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes fall {
-                    to {
-                        transform: translateY(-100vh) rotate(${Math.random() * 360}deg);
-                        opacity: 0;
+            if (!document.querySelector('#fall-animation')) {
+                const style = document.createElement('style');
+                style.id = 'fall-animation';
+                style.textContent = `
+                    @keyframes fall {
+                        to {
+                            transform: translateY(-100vh) rotate(${Math.random() * 360}deg);
+                            opacity: 0;
+                        }
                     }
-                }
-            `;
-            document.head.appendChild(style);
+                `;
+                document.head.appendChild(style);
+            }
         }
+        
+        // 添加触摸反馈
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(button => {
+            button.addEventListener('touchstart', function() {
+                this.style.opacity = '0.7';
+            });
+            
+            button.addEventListener('touchend', function() {
+                this.style.opacity = '1';
+            });
+        });
+        
+        // 防止iOS Safari缩放
+        document.addEventListener('touchstart', function(e) {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        });
+        
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(e) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
         
         // 初始化
         createHearts();
