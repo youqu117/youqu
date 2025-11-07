@@ -311,6 +311,18 @@
                 min-width: 100%;
             }
         }
+        
+        /* 添加庆祝爱心动画 */
+        @keyframes fall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -436,18 +448,17 @@
         
         // 创建庆祝爱心
         function createCelebrationHearts() {
-            const container = document.querySelector('.container');
-            
             for (let i = 0; i < 30; i++) {
                 const heart = document.createElement('div');
                 heart.innerHTML = '💖';
                 heart.style.position = 'fixed';
                 heart.style.fontSize = (Math.random() * 30 + 20) + 'px';
                 heart.style.left = Math.random() * 100 + 'vw';
-                heart.style.top = '100vh';
+                heart.style.top = '-50px';
                 heart.style.zIndex = '1000';
                 heart.style.animation = `fall ${Math.random() * 3 + 2}s linear forwards`;
                 heart.style.pointerEvents = 'none';
+                heart.style.animationDelay = Math.random() * 2 + 's';
                 
                 document.body.appendChild(heart);
                 
@@ -457,21 +468,6 @@
                         heart.parentNode.removeChild(heart);
                     }
                 }, 5000);
-            }
-            
-            // 添加CSS动画
-            if (!document.querySelector('#fall-animation')) {
-                const style = document.createElement('style');
-                style.id = 'fall-animation';
-                style.textContent = `
-                    @keyframes fall {
-                        to {
-                            transform: translateY(-100vh) rotate(${Math.random() * 360}deg);
-                            opacity: 0;
-                        }
-                    }
-                `;
-                document.head.appendChild(style);
             }
         }
         
