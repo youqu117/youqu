@@ -121,6 +121,11 @@
             background-color: #2980b9;
         }
         
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
         button.danger {
             background-color: var(--warning-color);
         }
@@ -158,6 +163,7 @@
         
         .file-checkbox {
             margin-right: 10px;
+            cursor: pointer;
         }
         
         .file-name {
@@ -191,11 +197,13 @@
             display: flex;
             align-items: center;
             font-weight: normal;
+            cursor: pointer;
         }
         
         .radio-group input, .checkbox-group input {
             width: auto;
             margin-right: 5px;
+            cursor: pointer;
         }
         
         .spinbox {
@@ -206,6 +214,11 @@
         .spinbox input {
             width: 80px;
             margin: 0 5px;
+        }
+        
+        .spinbox button {
+            width: auto;
+            padding: 5px 10px;
         }
         
         .button-group {
@@ -219,7 +232,7 @@
         }
         
         .hidden {
-            display: none;
+            display: none !important;
         }
         
         .modal {
@@ -557,51 +570,94 @@
         
         // DOM 加载完成后初始化
         document.addEventListener('DOMContentLoaded', function() {
-            initializeApp();
+            console.log('DOM加载完成，开始初始化应用');
+            try {
+                initializeApp();
+            } catch (error) {
+                console.error('初始化应用时出错:', error);
+                alert('应用初始化失败: ' + error.message);
+            }
         });
         
         function initializeApp() {
+            console.log('设置事件监听器');
             // 设置事件监听器
             setupEventListeners();
             
             // 初始模式设置
             toggleMode();
+            
+            console.log('应用初始化完成');
         }
         
         function setupEventListeners() {
+            console.log('绑定事件监听器');
+            
             // 模式切换
             document.querySelectorAll('input[name="mode"]').forEach(radio => {
                 radio.addEventListener('change', toggleMode);
             });
             
             // 文件夹选择
-            document.getElementById('inputDir').addEventListener('change', handleInputDirChange);
-            document.getElementById('outputDir').addEventListener('change', handleOutputDirChange);
+            const inputDirElement = document.getElementById('inputDir');
+            const outputDirElement = document.getElementById('outputDir');
+            
+            if (inputDirElement) {
+                inputDirElement.addEventListener('change', handleInputDirChange);
+            } else {
+                console.error('未找到输入文件夹元素');
+            }
+            
+            if (outputDirElement) {
+                outputDirElement.addEventListener('change', handleOutputDirChange);
+            } else {
+                console.error('未找到输出文件夹元素');
+            }
             
             // 数字调整按钮
-            document.getElementById('decreaseStartNum').addEventListener('click', () => adjustNumber('startNum', -1));
-            document.getElementById('increaseStartNum').addEventListener('click', () => adjustNumber('startNum', 1));
-            document.getElementById('decreaseXStart').addEventListener('click', () => adjustNumber('xStart', -1));
-            document.getElementById('increaseXStart').addEventListener('click', () => adjustNumber('xStart', 1));
-            document.getElementById('decreaseYStart').addEventListener('click', () => adjustNumber('yStart', -1));
-            document.getElementById('increaseYStart').addEventListener('click', () => adjustNumber('yStart', 1));
-            document.getElementById('decreaseXMax').addEventListener('click', () => adjustNumber('xMax', -1));
-            document.getElementById('increaseXMax').addEventListener('click', () => adjustNumber('xMax', 1));
-            document.getElementById('decreaseYMax').addEventListener('click', () => adjustNumber('yMax', -1));
-            document.getElementById('increaseYMax').addEventListener('click', () => adjustNumber('yMax', 1));
+            bindSpinboxButton('decreaseStartNum', 'startNum', -1);
+            bindSpinboxButton('increaseStartNum', 'startNum', 1);
+            bindSpinboxButton('decreaseXStart', 'xStart', -1);
+            bindSpinboxButton('increaseXStart', 'xStart', 1);
+            bindSpinboxButton('decreaseYStart', 'yStart', -1);
+            bindSpinboxButton('increaseYStart', 'yStart', 1);
+            bindSpinboxButton('decreaseXMax', 'xMax', -1);
+            bindSpinboxButton('increaseXMax', 'xMax', 1);
+            bindSpinboxButton('decreaseYMax', 'yMax', -1);
+            bindSpinboxButton('increaseYMax', 'yMax', 1);
             
             // 文件操作按钮
-            document.getElementById('selectAll').addEventListener('click', selectAllFiles);
-            document.getElementById('deselectAll').addEventListener('click', deselectAllFiles);
-            document.getElementById('refreshFiles').addEventListener('click', refreshFileList);
-            document.getElementById('previewRename').addEventListener('click', previewRename);
-            document.getElementById('executeRename').addEventListener('click', executeRename);
-            document.getElementById('exitApp').addEventListener('click', exitApp);
+            bindButton('selectAll', selectAllFiles);
+            bindButton('deselectAll', deselectAllFiles);
+            bindButton('refreshFiles', refreshFileList);
+            bindButton('previewRename', previewRename);
+            bindButton('executeRename', executeRename);
+            bindButton('exitApp', exitApp);
             
             // 模态框按钮
-            document.getElementById('closePreview').addEventListener('click', () => toggleModal('previewModal', false));
-            document.getElementById('confirmRename').addEventListener('click', confirmAndExecute);
-            document.getElementById('closeResult').addEventListener('click', () => toggleModal('resultModal', false));
+            bindButton('closePreview', () => toggleModal('previewModal', false));
+            bindButton('confirmRename', confirmAndExecute);
+            bindButton('closeResult', () => toggleModal('resultModal', false));
+            
+            console.log('所有事件监听器绑定完成');
+        }
+        
+        function bindButton(buttonId, handler) {
+            const button = document.getElementById(buttonId);
+            if (button) {
+                button.addEventListener('click', handler);
+            } else {
+                console.error('未找到按钮:', buttonId);
+            }
+        }
+        
+        function bindSpinboxButton(buttonId, inputId, change) {
+            const button = document.getElementById(buttonId);
+            if (button) {
+                button.addEventListener('click', () => adjustNumber(inputId, change));
+            } else {
+                console.error('未找到旋钮按钮:', buttonId);
+            }
         }
         
         function toggleMode() {
@@ -620,38 +676,60 @@
         
         function handleInputDirChange(event) {
             const files = event.target.files;
-            if (files.length > 0) {
+            if (files && files.length > 0) {
                 // 获取文件夹路径（通过第一个文件的路径）
                 const filePath = files[0].webkitRelativePath;
-                inputDir = filePath.substring(0, filePath.indexOf(files[0].name));
-                document.getElementById('inputDirText').textContent = inputDir || '当前文件夹';
-                
-                // 如果输出文件夹为空，设置为与输入文件夹相同
-                if (!outputDir) {
-                    outputDir = inputDir;
-                    document.getElementById('outputDirText').textContent = outputDir || '当前文件夹';
+                if (filePath) {
+                    inputDir = filePath.substring(0, filePath.indexOf(files[0].name));
+                    document.getElementById('inputDirText').textContent = inputDir || '当前文件夹';
+                    
+                    // 如果输出文件夹为空，设置为与输入文件夹相同
+                    if (!outputDir) {
+                        outputDir = inputDir;
+                        document.getElementById('outputDirText').textContent = outputDir || '当前文件夹';
+                    }
+                    
+                    // 刷新文件列表
+                    refreshFileList();
+                } else {
+                    console.error('无法获取文件路径');
+                    alert('无法获取文件夹路径，请确保选择了有效的文件夹');
                 }
-                
-                // 刷新文件列表
-                refreshFileList();
+            } else {
+                console.log('未选择文件');
+                inputDir = '';
+                document.getElementById('inputDirText').textContent = '未选择文件夹';
             }
         }
         
         function handleOutputDirChange(event) {
             const files = event.target.files;
-            if (files.length > 0) {
+            if (files && files.length > 0) {
                 // 获取文件夹路径（通过第一个文件的路径）
                 const filePath = files[0].webkitRelativePath;
-                outputDir = filePath.substring(0, filePath.indexOf(files[0].name));
-                document.getElementById('outputDirText').textContent = outputDir || '当前文件夹';
+                if (filePath) {
+                    outputDir = filePath.substring(0, filePath.indexOf(files[0].name));
+                    document.getElementById('outputDirText').textContent = outputDir || '当前文件夹';
+                } else {
+                    console.error('无法获取输出文件夹路径');
+                }
+            } else {
+                console.log('未选择输出文件夹');
+                outputDir = inputDir; // 回退到输入文件夹
+                document.getElementById('outputDirText').textContent = outputDir || '未选择文件夹';
             }
         }
         
         function adjustNumber(elementId, change) {
             const element = document.getElementById(elementId);
-            let value = parseInt(element.value) + change;
-            if (value < parseInt(element.min)) value = parseInt(element.min);
-            element.value = value;
+            if (element) {
+                let value = parseInt(element.value) + change;
+                const min = parseInt(element.min) || 1;
+                if (value < min) value = min;
+                element.value = value;
+            } else {
+                console.error('未找到元素:', elementId);
+            }
         }
         
         function refreshFileList() {
@@ -661,6 +739,7 @@
             
             if (!inputDir) {
                 statusBar.textContent = '❌ 错误: 请先选择输入文件夹';
+                fileListElement.innerHTML = '<div class="file-item"><div class="file-name">请先选择输入文件夹</div></div>';
                 return;
             }
             
@@ -701,13 +780,13 @@
                 fileListElement.appendChild(fileItem);
             });
             
-            // 更新选中状态
-            updateSelectionStatus();
-            
             // 为每个复选框添加事件监听器
             document.querySelectorAll('.file-checkbox').forEach(checkbox => {
                 checkbox.addEventListener('change', updateSelectionStatus);
             });
+            
+            // 更新选中状态
+            updateSelectionStatus();
         }
         
         function naturalSort(a, b) {
@@ -792,11 +871,23 @@
                     let newName = '';
                     try {
                         if (format.includes('{num')) {
-                            newName = eval('`' + format + '`') + ext;
+                            // 使用更安全的方式来格式化字符串
+                            if (format === '{num}') {
+                                newName = currentNum + ext;
+                            } else if (format === '{num:02d}') {
+                                newName = currentNum.toString().padStart(2, '0') + ext;
+                            } else if (format === '{num:03d}') {
+                                newName = currentNum.toString().padStart(3, '0') + ext;
+                            } else if (format === '{num:04d}') {
+                                newName = currentNum.toString().padStart(4, '0') + ext;
+                            } else {
+                                newName = currentNum + ext;
+                            }
                         } else {
                             newName = `${currentNum}${ext}`;
                         }
                     } catch (e) {
+                        console.error('格式化文件名时出错:', e);
                         newName = `${currentNum}${ext}`;
                     }
                     
@@ -950,10 +1041,14 @@
         
         function toggleModal(modalId, show) {
             const modal = document.getElementById(modalId);
-            if (show) {
-                modal.classList.remove('hidden');
+            if (modal) {
+                if (show) {
+                    modal.classList.remove('hidden');
+                } else {
+                    modal.classList.add('hidden');
+                }
             } else {
-                modal.classList.add('hidden');
+                console.error('未找到模态框:', modalId);
             }
         }
         
@@ -964,6 +1059,12 @@
                 alert('在浏览器环境中，此操作不会真正退出。在桌面应用中，程序将会关闭。');
             }
         }
+        
+        // 全局错误处理
+        window.addEventListener('error', function(e) {
+            console.error('全局错误:', e.error);
+            alert('发生错误: ' + e.error.message);
+        });
     </script>
 </body>
 </html>
